@@ -1,0 +1,1 @@
+export function SimpleCard({title,children}:{title:string,children:React.ReactNode}){return <section className='bg-white border rounded-xl p-4 mb-4'><h2 className='font-semibold mb-2'>{title}</h2>{children}</section>}
