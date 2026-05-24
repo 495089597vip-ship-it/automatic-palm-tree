@@ -1,0 +1,7 @@
+streamlit==1.40.1
+openpyxl==3.11.0
+python-dotenv==1.0.1
+pyperclip==1.9.0
+threading-utils==0.2.0
+openai==1.31.0
+pandas==2.2.0
