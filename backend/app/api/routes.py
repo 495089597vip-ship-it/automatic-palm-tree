@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from redis import Redis
 from rq import Queue
@@ -13,6 +14,16 @@ from app.schemas.generation import OpenAIImageGenerateRequest, OpenAIImageEditRe
 from app.worker.worker import process_task
 
 router = APIRouter(prefix="/api")
+
+
+def ensure_assets_schema(db: Session):
+    migration_file = Path(__file__).resolve().parents[2] / "migrations" / "sql" / "008_assets.sql"
+    sql = migration_file.read_text(encoding="utf-8")
+    statements = [stmt.strip() for stmt in sql.split(";") if stmt.strip()]
+    for stmt in statements:
+        db.execute(text(stmt))
+    db.commit()
+
 
 @router.get("/health")
 def health():
@@ -31,12 +42,14 @@ def list_projects(db: Session = Depends(get_db)):
 
 @router.get("/assets")
 def list_assets(db: Session = Depends(get_db)):
+    ensure_assets_schema(db)
     return db.execute(text("SELECT * FROM assets ORDER BY id DESC")).mappings().all()
 
 
 
 @router.post("/assets")
 def create_asset(payload: dict, db: Session = Depends(get_db)):
+    ensure_assets_schema(db)
     params = {
         "project_id": payload.get("project_id"),
         "task_id": payload.get("task_id"),
@@ -63,6 +76,7 @@ def create_asset(payload: dict, db: Session = Depends(get_db)):
 
 @router.post("/tasks/{task_id}/create-asset")
 def create_asset_from_task(task_id: int, db: Session = Depends(get_db)):
+    ensure_assets_schema(db)
     task = db.execute(text("""
         SELECT id, task_type, provider, payload, result, request_params, response_payload, cost_estimate
         FROM generation_tasks
