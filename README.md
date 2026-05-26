@@ -70,6 +70,7 @@ make up          # 启动
 make down        # 停止
 make logs        # 查看日志
 make migrate     # 执行 SQL 迁移
+make test-backend # 在 backend 容器内运行后端测试
 ```
 
 ## Mock 生成任务说明
